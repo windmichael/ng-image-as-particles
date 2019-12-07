@@ -5,7 +5,7 @@ import { TouchTexture } from './scripts/touch-texture';
 import { Shaders } from './scripts/shaders';
 
 @Component({
-  selector: 'ng-image-as-particles',
+  selector: 'lib-image-as-particles',
   template: `
     <div #container [style.background-color]="backgroundColor"
                       [style.touch-action]="touchAction"></div>
@@ -42,8 +42,8 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
 
   @Input()
   set imageUrl(imageUrl: string) {
-    //chech if hinding process is already going on
-    if(this._imageChanging == true) return;
+    // Check if hinding process is already going on
+    if (this._imageChanging === true) { return; }
     this._imageUrl = imageUrl;
     if (this.object3D != null) {
       this._imageChanging = true;
@@ -65,24 +65,24 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
   }
 
   ngAfterViewInit(): void {
-    if (this._imageUrl == null || this._imageUrl == '') return;
+    if (this._imageUrl == null || this._imageUrl === '') { return; }
     this.initScene();
     this.initParticles(this._imageUrl);
     this.renderer.setSize(this.canvasRef.nativeElement.clientWidth - 1, this.canvasRef.nativeElement.clientHeight);
     this.canvasRef.nativeElement.appendChild(this.renderer.domElement);
     this.canvasRef.nativeElement.addEventListener('mousemove', ev => { this.onMouseMove(ev); }, false);
-    this.canvasRef.nativeElement.addEventListener('touchmove', ev => { this.onTouchMove(ev) }, false);
+    this.canvasRef.nativeElement.addEventListener('touchmove', ev => { this.onTouchMove(ev); }, false);
     window.addEventListener('resize', ev => { this.resize(); }, false);
     window.addEventListener('scroll', ev => { this.onScroll(ev); }, true);
-    //this.canvasRef.nativeElement.addEventListener('click', ev => { this.onClick(ev); }, false);
+    // this.canvasRef.nativeElement.addEventListener('click', ev => { this.onClick(ev); }, false);
 
     this.animate();
   }
 
   ngOnDestroy() {
-    //remove event listeners
+    // remove event listeners
     this.canvasRef.nativeElement.removeEventListener('mousemove', ev => { this.onMouseMove(ev); }, false);
-    this.canvasRef.nativeElement.removeEventListener('touchmove', ev => { this.onTouchMove(ev) }, false);
+    this.canvasRef.nativeElement.removeEventListener('touchmove', ev => { this.onTouchMove(ev); }, false);
     window.removeEventListener('resize', ev => { this.resize(); }, false);
     window.removeEventListener('scroll', ev => { this.onScroll(ev); }, true);
   }
@@ -91,13 +91,15 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
     // scene
     this.scene = new THREE.Scene();
     // camera
-    this.camera = new THREE.PerspectiveCamera(50, this.canvasRef.nativeElement.clientWidth / this.canvasRef.nativeElement.clientHeight, 1, 10000);
+    this.camera = new THREE.PerspectiveCamera(50,
+      this.canvasRef.nativeElement.clientWidth / this.canvasRef.nativeElement.clientHeight,
+      1, 10000);
     this.camera.position.z = 300;
     // renderer
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     // clock
     this.clock = new THREE.Clock(true);
-    //mouse
+    // mouse
     this.mouse = new THREE.Vector2();
     this.raycaster = new THREE.Raycaster();
   }
@@ -146,7 +148,7 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
       originalColors = Float32Array.from(imgData.data);
 
       for (let i = 0; i < this.numPoints; i++) {
-        if (originalColors[i * 4 + 0] > threshold) numVisible++;
+        if (originalColors[i * 4 + 0] > threshold) { numVisible++; }
       }
     }
 
@@ -160,7 +162,7 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
       uTouch: { value: null },
     };
 
-    var shaders = new Shaders();
+    const shaders = new Shaders();
     const material = new THREE.RawShaderMaterial({
       uniforms,
       vertexShader: shaders.particleVertex,
@@ -196,7 +198,7 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
     const angles = new Float32Array(numVisible);
 
     for (let i = 0, j = 0; i < this.numPoints; i++) {
-      if (discard && originalColors[i * 4 + 0] <= threshold) continue;
+      if (discard && originalColors[i * 4 + 0] <= threshold) { continue; }
 
       offsets[j * 3 + 0] = i % this.width;
       offsets[j * 3 + 1] = Math.floor(i / this.width);
@@ -220,7 +222,7 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
 
   initTouch(): void {
     // create only once
-    if (!this.touch) this.touch = new TouchTexture();
+    if (!this.touch) { this.touch = new TouchTexture(); }
     (this.object3D.material as RawShaderMaterial).uniforms.uTouch.value = this.touch.texture;
   }
 
@@ -233,20 +235,20 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
   }
 
   public update(delta) {
-    if (!this.object3D) return;
-    if (this.touch) this.touch.update();
+    if (!this.object3D) { return; }
+    if (this.touch) { this.touch.update(); }
 
     (this.object3D.material as RawShaderMaterial).uniforms.uTime.value += delta;
   }
 
   show(time = 1.0) {
-    var interval = 50; //ms
-    var initValue1 = 0.5;
-    var endValue1 = 1.5;
-    var cnt1 = 0;
-    var value1 = 0.0;
+    const interval = 50; // ms
+    const initValue1 = 0.5;
+    const endValue1 = 1.5;
+    let cnt1 = 0;
+    let value1 = 0.0;
 
-    var interval1 = window.setInterval(() => {
+    const interval1 = window.setInterval(() => {
       cnt1 = cnt1 + 1;
       value1 = initValue1 + cnt1 * (endValue1 - initValue1) / (time * 1000 / interval);
       (this.object3D.material as RawShaderMaterial).uniforms.uSize.value = value1;
@@ -256,12 +258,12 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
       }
     }, interval);
 
-    var initValue2 = 0.0;
-    var endValue2 = 2.0;
-    var cnt2 = 0;
-    var value2 = 0.0;
+    const initValue2 = 0.0;
+    const endValue2 = 2.0;
+    let cnt2 = 0;
+    let value2 = 0.0;
 
-    var interval2 = window.setInterval(() => {
+    const interval2 = window.setInterval(() => {
       cnt2 = cnt2 + 1;
       value2 = initValue2 + cnt2 * (endValue2 - initValue2) / (time * 1000 / interval);
       (this.object3D.material as RawShaderMaterial).uniforms.uRandom.value = value2;
@@ -270,12 +272,12 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
       }
     }, interval);
 
-    var initValue3 = 40.0;
-    var endValue3 = 4.0;
-    var cnt3 = 0;
-    var value3 = 0.0;
+    const initValue3 = 40.0;
+    const endValue3 = 4.0;
+    let cnt3 = 0;
+    let value3 = 0.0;
 
-    var intervalHandler3 = window.setInterval(() => {
+    const intervalHandler3 = window.setInterval(() => {
       cnt3 = cnt3 + 1;
       value3 = initValue3 - cnt3 * (initValue3 - endValue3) / (time * 1000 / interval);
       (this.object3D.material as RawShaderMaterial).uniforms.uDepth.value = value3;
@@ -287,14 +289,14 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
   }
 
   hide(time: number = 0.8) {
-    var interval = 50; //ms
-    
-    var initValue3 = 1.5;
-    var endValue3 = 0.0;
-    var cnt3 = 0;
-    var value3 = 0.0;
+    const interval = 50; // ms
 
-    var intervalHandler3 = window.setInterval(() => {
+    const initValue3 = 1.5;
+    const endValue3 = 0.0;
+    let cnt3 = 0;
+    let value3 = 0.0;
+
+    const intervalHandler3 = window.setInterval(() => {
       cnt3 = cnt3 + 1;
       value3 = initValue3 - cnt3 * (initValue3 - endValue3) / (time * 1000 / interval);
       (this.object3D.material as RawShaderMaterial).uniforms.uSize.value = value3;
@@ -303,12 +305,12 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
       }
     }, interval);
 
-    var initValue2 = 3.0;
-    var endValue2 = -20.0;
-    var cnt2 = 0;
-    var value2 = 0.0;
+    const initValue2 = 3.0;
+    const endValue2 = -20.0;
+    let cnt2 = 0;
+    let value2 = 0.0;
 
-    var interval2 = window.setInterval(() => {
+    const interval2 = window.setInterval(() => {
       cnt2 = cnt2 + 1;
       value2 = initValue2 - cnt2 * (initValue2 - endValue2) / (time * 1000 / interval);
       (this.object3D.material as RawShaderMaterial).uniforms.uDepth.value = value2;
@@ -317,13 +319,13 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
       }
     }, interval);
 
-    var initValue1 = 0.0;
-    var endValue1 = 5.0;
-    var cnt1 = 0;
-    var value1 = 0.0;
+    const initValue1 = 0.0;
+    const endValue1 = 5.0;
+    let cnt1 = 0;
+    let value1 = 0.0;
 
     return new Promise((resolve, reject) => {
-      var interval1 = window.setInterval(() => {
+      const interval1 = window.setInterval(() => {
         cnt1 = cnt1 + 1;
         value1 = initValue1 + cnt1 * (endValue1 - initValue1) / (time * 1000 / interval);
         (this.object3D.material as RawShaderMaterial).uniforms.uRandom.value = value1;
@@ -337,14 +339,14 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
   }
 
   destroy() {
-    if (!this.object3D) return;
+    if (!this.object3D) { return; }
 
     this.object3D.parent.remove(this.object3D);
     this.object3D.geometry.dispose();
     (this.object3D.material as RawShaderMaterial).dispose();
     this.object3D = null;
 
-    if (!this.hitArea) return;
+    if (!this.hitArea) { return; }
 
     this.hitArea.parent.remove(this.hitArea);
     this.hitArea.geometry.dispose();
@@ -354,7 +356,7 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
 
   private animate() {
     window.requestAnimationFrame(() => this.animate());
-    if (this.stopAnimation != true) {
+    if (this.stopAnimation !== true) {
       const delta = this.clock.getDelta();
       this.update(delta);
 
@@ -375,10 +377,10 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
     this.mouse.y = - (event.clientY - this.canvasRef.nativeElement.offsetTop + window.scrollY) / this.canvasRef.nativeElement.clientHeight * 2 + 1;
     this.raycaster.setFromCamera(this.mouse, this.camera);
 
-    if (this.hitArea == undefined) return;
-    var intersects = this.raycaster.intersectObject(this.hitArea);
+    if (this.hitArea === undefined) { return; }
+    const intersects = this.raycaster.intersectObject(this.hitArea);
     if (intersects.length > 0) {
-      if (this.touch) this.touch.addTouch(intersects[0].uv.x, intersects[0].uv.y);
+      if (this.touch) { this.touch.addTouch(intersects[0].uv.x, intersects[0].uv.y); }
     }
   }
 
@@ -396,21 +398,21 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
     this.mouse.y = - (event.touches[0].clientY - this.canvasRef.nativeElement.offsetTop + window.scrollY) / this.canvasRef.nativeElement.clientHeight * 2 + 1;
     this.raycaster.setFromCamera(this.mouse, this.camera);
 
-    var intersects = this.raycaster.intersectObject(this.hitArea);
+    const intersects = this.raycaster.intersectObject(this.hitArea);
     if (intersects.length > 0) {
-      if (this.touch) this.touch.addTouch(intersects[0].uv.x, intersects[0].uv.y);
+      if (this.touch) { this.touch.addTouch(intersects[0].uv.x, intersects[0].uv.y); }
     }
   }
 
   private resize(): void {
-    if (this.height != undefined) {
+    if (this.height !== undefined) {
       this.camera.aspect = this.canvasRef.nativeElement.clientWidth / this.canvasRef.nativeElement.clientHeight;
       this.camera.updateProjectionMatrix();
-      var fovHeight = 2 * Math.tan(this.camera.fov * Math.PI / 180 / 2) * this.camera.position.z;
+      const fovHeight = 2 * Math.tan(this.camera.fov * Math.PI / 180 / 2) * this.camera.position.z;
       const scale = fovHeight / this.height;
       this.object3D.scale.set(scale, scale, 1);
-      //this.hitArea.scale.set(scale, scale, 1);
-      if (this.renderer != undefined) this.renderer.setSize(this.canvasRef.nativeElement.clientWidth, this.canvasRef.nativeElement.clientHeight);
+      // this.hitArea.scale.set(scale, scale, 1);
+      if (this.renderer !== undefined) { this.renderer.setSize(this.canvasRef.nativeElement.clientWidth, this.canvasRef.nativeElement.clientHeight); }
     }
   }
 }

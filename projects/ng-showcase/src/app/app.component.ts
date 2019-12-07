@@ -10,11 +10,11 @@ export class AppComponent implements OnInit {
   imageUrls: string[] = ['assets/dog.png', 'assets/pexels-photo.png', 'assets/tiger.png'];
   selectedUrl: string;
 
-  ngOnInit(){
+  ngOnInit() {
     this.selectedUrl = this.imageUrls[0];
   }
 
-  selectImage(selectedImageUrl: string){
+  selectImage(selectedImageUrl: string) {
     this.selectedUrl = selectedImageUrl;
   }
 }
