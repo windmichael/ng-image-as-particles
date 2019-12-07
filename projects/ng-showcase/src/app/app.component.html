@@ -1,4 +1,11 @@
-<div class="container">
-    <ng-image-as-particles imageUrl="assets/dog.png" touchAction="none"></ng-image-as-particles>
+<div class="main-container">
+    <div class="flex-column">
+        <h3>Image as interactive partilces demo</h3>
+        <div class="flex-row">
+            <div *ngFor="let imageUrl of imageUrls" class="image-selecton-container">
+                <img [src]="imageUrl" (click)="selectImage(imageUrl)">
+            </div>
+        </div>
+        <ng-image-as-particles [imageUrl]="selectedUrl" touchAction="none"></ng-image-as-particles>
+    </div>
 </div>
-<div style="height: 1500px; width: 100%;"></div>

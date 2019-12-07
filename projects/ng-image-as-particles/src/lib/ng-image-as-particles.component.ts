@@ -37,26 +37,63 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
   private mouse: THREE.Vector2;
   private raycaster: THREE.Raycaster;
   private stopAnimation: boolean;
+  private _imageUrl: string;
+  private _imageChanging: boolean;
 
-  @Input() imageUrl: string;
+  @Input()
+  set imageUrl(imageUrl: string) {
+    //chech if hinding process is already going on
+    if(this._imageChanging == true) return;
+    this._imageUrl = imageUrl;
+    if (this.object3D != null) {
+      this._imageChanging = true;
+      this.hide().then((value) => {
+        this.initParticles(this._imageUrl);
+      });
+    }
+  }
+  get imageUrl(): string { return this._imageUrl; }
   @Input() backgroundColor: string;
   @Input() touchAction: string;
 
-  @ViewChild('container', {static: false}) canvasRef: ElementRef;
+  @ViewChild('container', { static: false }) canvasRef: ElementRef;
 
   constructor() {
   }
 
-  ngOnInit(){
+  ngOnInit() {
   }
 
-  initScene(): void{
+  ngAfterViewInit(): void {
+    if (this._imageUrl == null || this._imageUrl == '') return;
+    this.initScene();
+    this.initParticles(this._imageUrl);
+    this.renderer.setSize(this.canvasRef.nativeElement.clientWidth - 1, this.canvasRef.nativeElement.clientHeight);
+    this.canvasRef.nativeElement.appendChild(this.renderer.domElement);
+    this.canvasRef.nativeElement.addEventListener('mousemove', ev => { this.onMouseMove(ev); }, false);
+    this.canvasRef.nativeElement.addEventListener('touchmove', ev => { this.onTouchMove(ev) }, false);
+    window.addEventListener('resize', ev => { this.resize(); }, false);
+    window.addEventListener('scroll', ev => { this.onScroll(ev); }, true);
+    //this.canvasRef.nativeElement.addEventListener('click', ev => { this.onClick(ev); }, false);
+
+    this.animate();
+  }
+
+  ngOnDestroy() {
+    //remove event listeners
+    this.canvasRef.nativeElement.removeEventListener('mousemove', ev => { this.onMouseMove(ev); }, false);
+    this.canvasRef.nativeElement.removeEventListener('touchmove', ev => { this.onTouchMove(ev) }, false);
+    window.removeEventListener('resize', ev => { this.resize(); }, false);
+    window.removeEventListener('scroll', ev => { this.onScroll(ev); }, true);
+  }
+
+  initScene(): void {
     // scene
-		this.scene = new THREE.Scene();
-		// camera
-		this.camera = new THREE.PerspectiveCamera(50, this.canvasRef.nativeElement.clientWidth / this.canvasRef.nativeElement.clientHeight, 1, 10000);
-		this.camera.position.z = 300;
-		// renderer
+    this.scene = new THREE.Scene();
+    // camera
+    this.camera = new THREE.PerspectiveCamera(50, this.canvasRef.nativeElement.clientWidth / this.canvasRef.nativeElement.clientHeight, 1, 10000);
+    this.camera.position.z = 300;
+    // renderer
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     // clock
     this.clock = new THREE.Clock(true);
@@ -65,115 +102,115 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
     this.raycaster = new THREE.Raycaster();
   }
 
-  initParticles(url: string): void{
+  initParticles(url: string): void {
     const loader = new THREE.TextureLoader();
     loader.load(url, (texture) => {
-			this.texture = texture;
-			this.texture.minFilter = THREE.LinearFilter;
-			this.texture.magFilter = THREE.LinearFilter;
-			this.texture.format = THREE.RGBFormat;
+      this.texture = texture;
+      this.texture.minFilter = THREE.LinearFilter;
+      this.texture.magFilter = THREE.LinearFilter;
+      this.texture.format = THREE.RGBFormat;
 
-			this.width = texture.image.width;
-			this.height = texture.image.height;
+      this.width = texture.image.width;
+      this.height = texture.image.height;
 
       this.initPoints(true);
-			this.initHitArea();
+      this.initHitArea();
       this.initTouch();
       this.resize();
       this.show();
-		});
+    });
   }
 
   initPoints(discard: boolean) {
-		this.numPoints = this.width * this.height;
+    this.numPoints = this.width * this.height;
 
-		let numVisible = this.numPoints;
-		let threshold = 0;
-		let originalColors;
+    let numVisible = this.numPoints;
+    let threshold = 0;
+    let originalColors;
 
-		if (discard) {
-			// discard pixels darker than threshold #22
-			numVisible = 0;
-			threshold = 34;
+    if (discard) {
+      // discard pixels darker than threshold #22
+      numVisible = 0;
+      threshold = 34;
 
-			const img = this.texture.image;
-			const canvas = document.createElement('canvas');
-			const ctx = canvas.getContext('2d');
+      const img = this.texture.image;
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
 
-			canvas.width = this.width;
-			canvas.height = this.height;
-			ctx.scale(1, -1);
-			ctx.drawImage(img, 0, 0, this.width, this.height * -1);
+      canvas.width = this.width;
+      canvas.height = this.height;
+      ctx.scale(1, -1);
+      ctx.drawImage(img, 0, 0, this.width, this.height * -1);
 
-			const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-			originalColors = Float32Array.from(imgData.data);
+      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      originalColors = Float32Array.from(imgData.data);
 
-			for (let i = 0; i < this.numPoints; i++) {
-				if (originalColors[i * 4 + 0] > threshold) numVisible++;
-			}
-		}
+      for (let i = 0; i < this.numPoints; i++) {
+        if (originalColors[i * 4 + 0] > threshold) numVisible++;
+      }
+    }
 
-		const uniforms = {
-			uTime: { value: 0 },
-			uRandom: { value: 1.0 },
-			uDepth: { value: 2.0 },
-			uSize: { value: 0.0 },
-			uTextureSize: { value: new THREE.Vector2(this.width, this.height) },
-			uTexture: { value: this.texture },
-			uTouch: { value: null },
-		};
+    const uniforms = {
+      uTime: { value: 0 },
+      uRandom: { value: 1.0 },
+      uDepth: { value: 2.0 },
+      uSize: { value: 0.0 },
+      uTextureSize: { value: new THREE.Vector2(this.width, this.height) },
+      uTexture: { value: this.texture },
+      uTouch: { value: null },
+    };
 
     var shaders = new Shaders();
-		const material = new THREE.RawShaderMaterial({
-			uniforms,
-			vertexShader: shaders.particleVertex,
-			fragmentShader: shaders.particleFragment,
-			depthTest: false,
-			transparent: true,
-			// blending: THREE.AdditiveBlending
-		});
+    const material = new THREE.RawShaderMaterial({
+      uniforms,
+      vertexShader: shaders.particleVertex,
+      fragmentShader: shaders.particleFragment,
+      depthTest: false,
+      transparent: true,
+      // blending: THREE.AdditiveBlending
+    });
 
-		const geometry = new THREE.InstancedBufferGeometry();
+    const geometry = new THREE.InstancedBufferGeometry();
 
-		// positions
-		const positions = new THREE.BufferAttribute(new Float32Array(4 * 3), 3);
-		positions.setXYZ(0, -0.5,  0.5,  0.0);
-		positions.setXYZ(1,  0.5,  0.5,  0.0);
-		positions.setXYZ(2, -0.5, -0.5,  0.0);
-		positions.setXYZ(3,  0.5, -0.5,  0.0);
-		geometry.addAttribute('position', positions);
+    // positions
+    const positions = new THREE.BufferAttribute(new Float32Array(4 * 3), 3);
+    positions.setXYZ(0, -0.5, 0.5, 0.0);
+    positions.setXYZ(1, 0.5, 0.5, 0.0);
+    positions.setXYZ(2, -0.5, -0.5, 0.0);
+    positions.setXYZ(3, 0.5, -0.5, 0.0);
+    geometry.addAttribute('position', positions);
 
-		// uvs
-		const uvs = new THREE.BufferAttribute(new Float32Array(4 * 2), 2);
-		uvs.setXY(0,  0.0,  0.0);
-		uvs.setXY(1,  1.0,  0.0);
-		uvs.setXY(2,  0.0,  1.0);
-		uvs.setXY(3,  1.0,  1.0);
-		geometry.addAttribute('uv', uvs);
+    // uvs
+    const uvs = new THREE.BufferAttribute(new Float32Array(4 * 2), 2);
+    uvs.setXY(0, 0.0, 0.0);
+    uvs.setXY(1, 1.0, 0.0);
+    uvs.setXY(2, 0.0, 1.0);
+    uvs.setXY(3, 1.0, 1.0);
+    geometry.addAttribute('uv', uvs);
 
-		// index
-		geometry.setIndex(new THREE.BufferAttribute(new Uint16Array([ 0, 2, 1, 2, 3, 1 ]), 1));
+    // index
+    geometry.setIndex(new THREE.BufferAttribute(new Uint16Array([0, 2, 1, 2, 3, 1]), 1));
 
-		const indices = new Uint16Array(numVisible);
-		const offsets = new Float32Array(numVisible * 3);
-		const angles = new Float32Array(numVisible);
+    const indices = new Uint16Array(numVisible);
+    const offsets = new Float32Array(numVisible * 3);
+    const angles = new Float32Array(numVisible);
 
-		for (let i = 0, j = 0; i < this.numPoints; i++) {
-			if (discard && originalColors[i * 4 + 0] <= threshold) continue;
+    for (let i = 0, j = 0; i < this.numPoints; i++) {
+      if (discard && originalColors[i * 4 + 0] <= threshold) continue;
 
-			offsets[j * 3 + 0] = i % this.width;
-			offsets[j * 3 + 1] = Math.floor(i / this.width);
+      offsets[j * 3 + 0] = i % this.width;
+      offsets[j * 3 + 1] = Math.floor(i / this.width);
 
-			indices[j] = i;
+      indices[j] = i;
 
-			angles[j] = Math.random() * Math.PI;
+      angles[j] = Math.random() * Math.PI;
 
-			j++;
-		}
+      j++;
+    }
 
-		geometry.addAttribute('pindex', new THREE.InstancedBufferAttribute(indices, 1, false));
-		geometry.addAttribute('offset', new THREE.InstancedBufferAttribute(offsets, 3, false));
-		geometry.addAttribute('angle', new THREE.InstancedBufferAttribute(angles, 1, false));
+    geometry.addAttribute('pindex', new THREE.InstancedBufferAttribute(indices, 1, false));
+    geometry.addAttribute('offset', new THREE.InstancedBufferAttribute(offsets, 3, false));
+    geometry.addAttribute('angle', new THREE.InstancedBufferAttribute(angles, 1, false));
 
     this.object3D = new THREE.Mesh(geometry, material);
     this.container = new THREE.Object3D();
@@ -182,29 +219,27 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
   }
 
   initTouch(): void {
-		// create only once
-		if (!this.touch) this.touch = new TouchTexture();
-		(this.object3D.material as RawShaderMaterial).uniforms.uTouch.value = this.touch.texture;
+    // create only once
+    if (!this.touch) this.touch = new TouchTexture();
+    (this.object3D.material as RawShaderMaterial).uniforms.uTouch.value = this.touch.texture;
   }
-  
+
   initHitArea() {
-		const geometry = new THREE.PlaneGeometry(this.width, this.height, 1, 1);
-		const material = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, wireframe: true, depthTest: false });
-		material.visible = false;
+    const geometry = new THREE.PlaneGeometry(this.width, this.height, 1, 1);
+    const material = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, wireframe: true, depthTest: false });
+    material.visible = false;
     this.hitArea = new THREE.Mesh(geometry, material);
-		this.object3D.add(this.hitArea);
+    this.object3D.add(this.hitArea);
   }
 
   public update(delta) {
-		if (!this.object3D) return;
-		if (this.touch) this.touch.update();
+    if (!this.object3D) return;
+    if (this.touch) this.touch.update();
 
-		(this.object3D.material as RawShaderMaterial).uniforms.uTime.value += delta;
+    (this.object3D.material as RawShaderMaterial).uniforms.uTime.value += delta;
   }
 
   show(time = 1.0) {
-    // reset
-		//TweenLite.fromTo((this.object3D.material as RawShaderMaterial).uniforms.uSize, time, { value: 0.5 }, { value: 1.5 });
     var interval = 50; //ms
     var initValue1 = 0.5;
     var endValue1 = 1.5;
@@ -215,16 +250,14 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
       cnt1 = cnt1 + 1;
       value1 = initValue1 + cnt1 * (endValue1 - initValue1) / (time * 1000 / interval);
       (this.object3D.material as RawShaderMaterial).uniforms.uSize.value = value1;
-      if(value1 >= endValue1) {
+      if (value1 >= endValue1) {
         window.clearInterval(interval1);
+        this._imageChanging = false;
       }
     }, interval);
-    
 
-    //TweenLite.to((this.object3D.material as RawShaderMaterial).uniforms.uRandom, time, { value: 2.0 });
     var initValue2 = 0.0;
     var endValue2 = 2.0;
-    var inteval2 = time * 1000 / (initValue2 - endValue2) //ms
     var cnt2 = 0;
     var value2 = 0.0;
 
@@ -232,14 +265,11 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
       cnt2 = cnt2 + 1;
       value2 = initValue2 + cnt2 * (endValue2 - initValue2) / (time * 1000 / interval);
       (this.object3D.material as RawShaderMaterial).uniforms.uRandom.value = value2;
-      if(value2 >= endValue2) {
+      if (value2 >= endValue2) {
         window.clearInterval(interval2);
       }
     }, interval);
-    
-    
-    //TweenLite.fromTo((this.object3D.material as RawShaderMaterial).uniforms.uDepth, time * 1.5, { value: 40.0 }, { value: 4.0 });
-    
+
     var initValue3 = 40.0;
     var endValue3 = 4.0;
     var cnt3 = 0;
@@ -249,95 +279,105 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
       cnt3 = cnt3 + 1;
       value3 = initValue3 - cnt3 * (initValue3 - endValue3) / (time * 1000 / interval);
       (this.object3D.material as RawShaderMaterial).uniforms.uDepth.value = value3;
-      if(value3 <= endValue3) {
+      if (value3 <= endValue3) {
         window.clearInterval(intervalHandler3);
       }
     }, interval);
-    
-  }
-  
-  hide(_destroy, time = 0.8) {
-    /*
-		return new Promise((resolve, reject) => {
-			TweenLite.to((this.object3D.material as RawShaderMaterial).uniforms.uRandom, time, { value: 5.0, onComplete: () => {
-				if (_destroy) this.destroy();
-				resolve();
-			} });
-			TweenLite.to((this.object3D.material as RawShaderMaterial).uniforms.uDepth, time, { value: -20.0 });
-			TweenLite.to((this.object3D.material as RawShaderMaterial).uniforms.uSize, time * 0.8, { value: 0.0 });
 
-			//this.removeListeners();
+  }
+
+  hide(time: number = 0.8) {
+    var interval = 50; //ms
+    
+    var initValue3 = 1.5;
+    var endValue3 = 0.0;
+    var cnt3 = 0;
+    var value3 = 0.0;
+
+    var intervalHandler3 = window.setInterval(() => {
+      cnt3 = cnt3 + 1;
+      value3 = initValue3 - cnt3 * (initValue3 - endValue3) / (time * 1000 / interval);
+      (this.object3D.material as RawShaderMaterial).uniforms.uSize.value = value3;
+      if (value3 <= endValue3) {
+        window.clearInterval(intervalHandler3);
+      }
+    }, interval);
+
+    var initValue2 = 3.0;
+    var endValue2 = -20.0;
+    var cnt2 = 0;
+    var value2 = 0.0;
+
+    var interval2 = window.setInterval(() => {
+      cnt2 = cnt2 + 1;
+      value2 = initValue2 - cnt2 * (initValue2 - endValue2) / (time * 1000 / interval);
+      (this.object3D.material as RawShaderMaterial).uniforms.uDepth.value = value2;
+      if (value2 <= endValue2) {
+        window.clearInterval(interval2);
+      }
+    }, interval);
+
+    var initValue1 = 0.0;
+    var endValue1 = 5.0;
+    var cnt1 = 0;
+    var value1 = 0.0;
+
+    return new Promise((resolve, reject) => {
+      var interval1 = window.setInterval(() => {
+        cnt1 = cnt1 + 1;
+        value1 = initValue1 + cnt1 * (endValue1 - initValue1) / (time * 1000 / interval);
+        (this.object3D.material as RawShaderMaterial).uniforms.uRandom.value = value1;
+        if (value1 >= endValue1) {
+          window.clearInterval(interval1);
+          this.destroy();
+          resolve();
+        }
+      }, interval);
     });
-    */
   }
 
   destroy() {
-		if (!this.object3D) return;
+    if (!this.object3D) return;
 
-		this.object3D.parent.remove(this.object3D);
-		this.object3D.geometry.dispose();
-		(this.object3D.material as RawShaderMaterial).dispose();
-		this.object3D = null;
+    this.object3D.parent.remove(this.object3D);
+    this.object3D.geometry.dispose();
+    (this.object3D.material as RawShaderMaterial).dispose();
+    this.object3D = null;
 
-		if (!this.hitArea) return;
+    if (!this.hitArea) return;
 
-		this.hitArea.parent.remove(this.hitArea);
-		this.hitArea.geometry.dispose();
-		(this.hitArea.material as RawShaderMaterial).dispose();
-		this.hitArea = null;
+    this.hitArea.parent.remove(this.hitArea);
+    this.hitArea.geometry.dispose();
+    (this.hitArea.material as RawShaderMaterial).dispose();
+    this.hitArea = null;
   }
 
-  ngAfterViewInit(): void {
-    if(this.imageUrl == null || this.imageUrl == '') return;
-    this.initScene();
-    this.initParticles(this.imageUrl);
-    this.renderer.setSize(this.canvasRef.nativeElement.clientWidth-1, this.canvasRef.nativeElement.clientHeight);
-    this.canvasRef.nativeElement.appendChild(this.renderer.domElement);
-    this.canvasRef.nativeElement.addEventListener( 'mousemove', ev => {this.onMouseMove(ev);}, false);
-    this.canvasRef.nativeElement.addEventListener('touchmove', ev => {this.onTouchMove(ev)}, false);
-    window.addEventListener( 'resize', ev => {this.resize();}, false);
-    window.addEventListener('scroll', ev => {this.onScroll(ev);}, true);
-    //this.canvasRef.nativeElement.addEventListener('click', ev => { this.onClick(ev); }, false);
-  
-    this.animate();
-  }
-
-  ngOnDestroy(){
-    //remove event listeners
-    this.canvasRef.nativeElement.removeEventListener( 'mousemove', ev => {this.onMouseMove(ev);}, false);
-    this.canvasRef.nativeElement.removeEventListener('touchmove', ev => {this.onTouchMove(ev)}, false);
-    window.removeEventListener( 'resize', ev => {this.resize();}, false);
-    window.removeEventListener('scroll', ev => {this.onScroll(ev);}, true);
-  }
-
-  private animate(){
+  private animate() {
     window.requestAnimationFrame(() => this.animate());
-    if(this.stopAnimation != true){
+    if (this.stopAnimation != true) {
       const delta = this.clock.getDelta();
       this.update(delta);
-  
-      this.renderer.render( this.scene, this.camera );
+
+      this.renderer.render(this.scene, this.camera);
     }
   }
 
-  onScroll(event){
-    if(window.pageYOffset / window.innerHeight > 0.9){
+  onScroll(event) {
+    if (window.pageYOffset / window.innerHeight > 0.9) {
       this.stopAnimation = true;
-    }else{
+    } else {
       this.stopAnimation = false;
     }
   }
 
-  onMouseMove( event: MouseEvent ): void {
-    //this.mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-    this.mouse.x = ( event.clientX - this.canvasRef.nativeElement.offsetLeft) / this.canvasRef.nativeElement.clientWidth * 2 - 1;
-    //this.mouse.y = - ( (event.clientY + window.pageYOffset) / window.innerHeight ) * 2 + 1;
-    this.mouse.y = - ( event.clientY - this.canvasRef.nativeElement.offsetTop) / this.canvasRef.nativeElement.clientHeight * 2 + 1;
-    this.raycaster.setFromCamera( this.mouse, this.camera );
-    
-    if(this.hitArea == undefined) return;
+  onMouseMove(event: MouseEvent): void {
+    this.mouse.x = (event.clientX - this.canvasRef.nativeElement.offsetLeft + window.scrollX) / this.canvasRef.nativeElement.clientWidth * 2 - 1;
+    this.mouse.y = - (event.clientY - this.canvasRef.nativeElement.offsetTop + window.scrollY) / this.canvasRef.nativeElement.clientHeight * 2 + 1;
+    this.raycaster.setFromCamera(this.mouse, this.camera);
+
+    if (this.hitArea == undefined) return;
     var intersects = this.raycaster.intersectObject(this.hitArea);
-    if(intersects.length > 0){
+    if (intersects.length > 0) {
       if (this.touch) this.touch.addTouch(intersects[0].uv.x, intersects[0].uv.y);
     }
   }
@@ -351,27 +391,26 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
   }
   */
 
-  onTouchMove( event: TouchEvent ): void {
-    this.mouse.x = ( event.touches[0].clientX - this.canvasRef.nativeElement.offsetLeft) / this.canvasRef.nativeElement.clientWidth * 2 - 1;
-    this.mouse.y = - ( event.touches[0].clientY - this.canvasRef.nativeElement.offsetTop) / this.canvasRef.nativeElement.clientHeight * 2 + 1;
-    this.raycaster.setFromCamera( this.mouse, this.camera );
-    
+  onTouchMove(event: TouchEvent): void {
+    this.mouse.x = (event.touches[0].clientX - this.canvasRef.nativeElement.offsetLeft + window.scrollX) / this.canvasRef.nativeElement.clientWidth * 2 - 1;
+    this.mouse.y = - (event.touches[0].clientY - this.canvasRef.nativeElement.offsetTop + window.scrollY) / this.canvasRef.nativeElement.clientHeight * 2 + 1;
+    this.raycaster.setFromCamera(this.mouse, this.camera);
+
     var intersects = this.raycaster.intersectObject(this.hitArea);
-    if(intersects.length > 0){
+    if (intersects.length > 0) {
       if (this.touch) this.touch.addTouch(intersects[0].uv.x, intersects[0].uv.y);
     }
   }
 
-  private resize(): void{
-    if(this.height != undefined){
+  private resize(): void {
+    if (this.height != undefined) {
       this.camera.aspect = this.canvasRef.nativeElement.clientWidth / this.canvasRef.nativeElement.clientHeight;
-		  this.camera.updateProjectionMatrix();
+      this.camera.updateProjectionMatrix();
       var fovHeight = 2 * Math.tan(this.camera.fov * Math.PI / 180 / 2) * this.camera.position.z;
       const scale = fovHeight / this.height;
       this.object3D.scale.set(scale, scale, 1);
       //this.hitArea.scale.set(scale, scale, 1);
-      //if(this.renderer != undefined) this.renderer.setSize(window.innerWidth - 30, window.innerHeight);
-      if(this.renderer != undefined) this.renderer.setSize(this.canvasRef.nativeElement.clientWidth-1, this.canvasRef.nativeElement.clientHeight);
+      if (this.renderer != undefined) this.renderer.setSize(this.canvasRef.nativeElement.clientWidth, this.canvasRef.nativeElement.clientHeight);
     }
   }
 }
