@@ -5,6 +5,30 @@
 * [Angular](https://angular.io) (*requires* Angular 8+ )
 * [three.js](https://threejs.org) (*requires* threejs 0.108.0 )
 
+## Installation
+#### 1. Install version 0.108.0 of `three.js` via npm:
+```
+npm install three@0.108.0
+```
+
+#### 2. Install `ng-image-as-particles` via npm:
+```
+npm install ng-image-as-particles
+```
+Once installed you need to import the main module:
+```typescript
+import { NgImageAsParticlesModule } from 'ng-image-as-particles';
+
+@NgModule({
+  declarations: [AppComponent, ...],
+  imports: [NgImageAsParticlesModule],  
+  bootstrap: [AppComponent]
+})
+export class AppModule {
+}
+```
+
+
 ## Usage
 ```html
 <lib-image-as-particles [imageUrl]="selectedUrl" 
