@@ -1,5 +1,18 @@
-<h1 align="center">Image As Particles</h1>
-<p align="center">Angular library to show images as particles with using three.js</p>
+# Image As Particles
+Angular library to show images as particles with using three.js
+
+This library is based on the great work and code of [Bruno Imbrizi](https://github.com/brunoimbrizi/) and brought to Angular.
+
+A description and a tutorial how the project was created can be found on https://tympanus.net/codrops/2019/01/17/interactive-particles-with-three-js/ 
+
+![](example.gif)
+
+## Demo
+
+[Stackblitz Showcase](https://stackblitz.com/github/windmichael/ng-image-as-particles)
+
+`ng-image-as-particles` used on a homepage on welcome page: https://lenny-the-samoyed.firebaseapp.com/
+
 
 ## Dependencies
 * [Angular](https://angular.io) (*requires* Angular 8+ )
