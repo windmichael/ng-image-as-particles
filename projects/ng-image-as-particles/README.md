@@ -5,11 +5,13 @@ This library is based on the great work and code of [Bruno Imbrizi](https://gith
 
 A description and a tutorial how the project was created can be found on https://tympanus.net/codrops/2019/01/17/interactive-particles-with-three-js/ 
 
-![](example.gif)
+| Original image  | Image as interactive particles | 
+| ------ | ------------------ | 
+| ![image](projects/ng-showcase/src/assets/dog.png) | ![](example.gif) | 
 
 ## Demo
 
-[Stackblitz Showcase](https://stackblitz.com/github/windmichael/ng-image-as-particles)
+[Showcase](https://windmichael.github.io/ng-image-as-particles/)
 
 `ng-image-as-particles` used on a homepage on welcome page: https://lenny-the-samoyed.firebaseapp.com/
 
