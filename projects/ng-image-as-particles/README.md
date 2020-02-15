@@ -46,9 +46,9 @@ export class AppModule {
 
 ## Usage
 ```html
-<lib-image-as-particles [imageUrl]="selectedUrl" 
-                        backgroundColor="#222" 
-                        touchAction="none">
+<lib-image-as-particles [imageUrl]="selectedUrl" touchAction="none"
+            imageWidth="90%" imageHeight="90%"
+            horizontalAlignment="center" verticalAlignment="center">
 </lib-image-as-particles>
 ```
 
@@ -58,3 +58,8 @@ export class AppModule {
 | imageUrl | null | URL to the image |
 | backgroundColor | "#222" | The background-color CSS property sets the background color of an element. ([background-color](https://developer.mozilla.org/en-US/docs/Web/CSS/background-color)) |
 | touchAction | "none" | The touch-action CSS property sets how an element's region can be manipulated by a touchscreen user. ([touchAction](https://developer.mozilla.org/en-US/docs/Web/CSS/touch-action)) |
+| imageWidth | "100%" | Width of the generated image in "px" or "%" |
+| imageHeight | "100%" | Height of the generated image in "px" or "%" |
+| horizontalAlignment | "center" | Possible values: "start", "center", "end" |
+| verticalAlignment | "center" | Possible values: "top", "center", "bottom" |
+
