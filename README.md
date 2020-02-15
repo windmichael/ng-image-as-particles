@@ -46,9 +46,9 @@ export class AppModule {
 
 ## Usage
 ```html
-<lib-image-as-particles [imageUrl]="selectedUrl" 
-                        backgroundColor="#222" 
-                        touchAction="none">
+<lib-image-as-particles [imageUrl]="selectedUrl" touchAction="none"
+            imageWidth="90%" imageHeight="90%"
+            horizontalAlignment="center" verticalAlignment="center">
 </lib-image-as-particles>
 ```
 
