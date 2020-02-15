@@ -8,11 +8,16 @@ import { Shaders } from './scripts/shaders';
   selector: 'lib-image-as-particles',
   template: `
     <div #container [style.background-color]="backgroundColor"
-                      [style.touch-action]="touchAction"></div>
+                      [style.touch-action]="touchAction"
+                      [style.justify-content]="justifyContent"
+                      [style.align-items]="alignItems"></div>
   `,
   styles: [`
     div{
       position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       width: 100%;
       height: 100%;
       background-color: #222;
@@ -30,8 +35,8 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
   private object3D: THREE.Mesh;
   private container: THREE.Object3D;
   private hitArea: THREE.Mesh;
-  private width: any;
-  private height: any;
+  private width: number;
+  private height: number;
   private numPoints: number;
   private touch: TouchTexture;
   private mouse: THREE.Vector2;
@@ -39,6 +44,8 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
   private stopAnimation: boolean;
   private _imageUrl: string;
   private _imageChanging: boolean;
+  justifyContent: string;
+  alignItems: string;
 
   @Input()
   set imageUrl(imageUrl: string) {
@@ -55,6 +62,44 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
   get imageUrl(): string { return this._imageUrl; }
   @Input() backgroundColor: string;
   @Input() touchAction: string;
+  @Input() imageWidth: string;
+  @Input() imageHeight: string;
+  @Input()
+  set horizontalAlignment(horizontalAlignment: string) {
+    switch (horizontalAlignment) {
+      case 'start':
+        this.justifyContent = 'flex-start';
+        break;
+      case 'center':
+        this.justifyContent = 'center';
+        break;
+      case 'center':
+        this.justifyContent = 'flex-end';
+        break;
+      default:
+        this.justifyContent = null;
+        break;
+    }
+  }
+  get horizontalAlignment(): string { return this.justifyContent; }
+  @Input()
+  set verticalAlignment(verticalAlignment: string) {
+    switch (verticalAlignment) {
+      case 'top':
+        this.alignItems = 'flex-start';
+        break;
+      case 'center':
+        this.alignItems = 'center';
+        break;
+      case 'bottom':
+        this.alignItems = 'flex-end';
+        break;
+      default:
+        this.alignItems = null;
+        break;
+    }
+  }
+  get verticalAlignment(): string { return this.alignItems; }
 
   @ViewChild('container', { static: false }) canvasRef: ElementRef;
 
@@ -70,8 +115,8 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
     this.initParticles(this._imageUrl);
     this.renderer.setSize(this.canvasRef.nativeElement.clientWidth - 1, this.canvasRef.nativeElement.clientHeight);
     this.canvasRef.nativeElement.appendChild(this.renderer.domElement);
-    this.canvasRef.nativeElement.addEventListener('mousemove', ev => { this.onMouseMove(ev); }, false);
-    this.canvasRef.nativeElement.addEventListener('touchmove', ev => { this.onTouchMove(ev); }, false);
+    this.canvasRef.nativeElement.children[0].addEventListener('mousemove', ev => { this.onMouseMove(ev); }, false);
+    this.canvasRef.nativeElement.children[0].addEventListener('touchmove', ev => { this.onTouchMove(ev); }, false);
     window.addEventListener('resize', ev => { this.resize(); }, false);
     window.addEventListener('scroll', ev => { this.onScroll(ev); }, true);
     // this.canvasRef.nativeElement.addEventListener('click', ev => { this.onClick(ev); }, false);
@@ -373,8 +418,12 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
   }
 
   onMouseMove(event: MouseEvent): void {
-    this.mouse.x = (event.clientX - this.canvasRef.nativeElement.offsetLeft + window.scrollX) / this.canvasRef.nativeElement.clientWidth * 2 - 1;
-    this.mouse.y = - (event.clientY - this.canvasRef.nativeElement.offsetTop + window.scrollY) / this.canvasRef.nativeElement.clientHeight * 2 + 1;
+    const offsetLeft = this.canvasRef.nativeElement.offsetLeft + this.canvasRef.nativeElement.children[0].offsetLeft;
+    const offsetTop = this.canvasRef.nativeElement.offsetTop + this.canvasRef.nativeElement.children[0].offsetTop;
+    this.mouse.x = (event.clientX - offsetLeft + window.scrollX) / this.canvasRef.nativeElement.children[0].clientWidth * 2 - 1;
+    this.mouse.y = - (event.clientY - offsetTop + window.scrollY) / this.canvasRef.nativeElement.children[0].clientHeight * 2 + 1;
+    // console.info('raw: x= ' + event.clientX + ' , y= ' + event.clientY);
+    // console.info('normalized: x= ' + this.mouse.x + ' , y= ' + this.mouse.y);
     this.raycaster.setFromCamera(this.mouse, this.camera);
 
     if (this.hitArea === undefined) { return; }
@@ -394,8 +443,10 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
   */
 
   onTouchMove(event: TouchEvent): void {
-    this.mouse.x = (event.touches[0].clientX - this.canvasRef.nativeElement.offsetLeft + window.scrollX) / this.canvasRef.nativeElement.clientWidth * 2 - 1;
-    this.mouse.y = - (event.touches[0].clientY - this.canvasRef.nativeElement.offsetTop + window.scrollY) / this.canvasRef.nativeElement.clientHeight * 2 + 1;
+    const offsetLeft = this.canvasRef.nativeElement.offsetLeft + this.canvasRef.nativeElement.children[0].offsetLeft;
+    const offsetTop = this.canvasRef.nativeElement.offsetTop + this.canvasRef.nativeElement.children[0].offsetTop;
+    this.mouse.x = (event.touches[0].clientX - offsetLeft + window.scrollX) / this.canvasRef.nativeElement.children[0].clientWidth * 2 - 1;
+    this.mouse.y = - (event.touches[0].clientY - offsetTop + window.scrollY) / this.canvasRef.nativeElement.children[0].clientHeight * 2 + 1;
     this.raycaster.setFromCamera(this.mouse, this.camera);
 
     const intersects = this.raycaster.intersectObject(this.hitArea);
@@ -406,13 +457,31 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
 
   private resize(): void {
     if (this.height !== undefined) {
-      this.camera.aspect = this.canvasRef.nativeElement.clientWidth / this.canvasRef.nativeElement.clientHeight;
+      this.camera.aspect = this.canvasRef.nativeElement.children[0].clientWidth / this.canvasRef.nativeElement.children[0].clientHeight;
       this.camera.updateProjectionMatrix();
       const fovHeight = 2 * Math.tan(this.camera.fov * Math.PI / 180 / 2) * this.camera.position.z;
       const scale = fovHeight / this.height;
       this.object3D.scale.set(scale, scale, 1);
       // this.hitArea.scale.set(scale, scale, 1);
-      if (this.renderer !== undefined) { this.renderer.setSize(this.canvasRef.nativeElement.clientWidth, this.canvasRef.nativeElement.clientHeight); }
+      if (this.renderer !== undefined) {
+        const width = this.imageWidth == null ? this.canvasRef.nativeElement.clientWidth :
+            this.distanceAsNumber(this.imageWidth, this.canvasRef.nativeElement.clientWidth);
+        const height = this.imageHeight == null ? this.canvasRef.nativeElement.clientHeight :
+            this.distanceAsNumber(this.imageHeight, this.canvasRef.nativeElement.clientHeight);
+        this.renderer.setSize(width, height);
+      }
     }
+  }
+
+  private distanceAsNumber(distance: string, parentDistance: number): number {
+    let returnVal = 0;
+    if (distance.includes('px')) {
+      returnVal = Number.parseInt(distance.replace('px', ''), 10);
+    } else if (distance.includes('%')) {
+      returnVal = Number.parseInt(distance.replace('%', ''), 10) / 100 * parentDistance;
+    } else {
+      returnVal = Number.parseInt(distance, 10);
+    }
+    return returnVal;
   }
 }
