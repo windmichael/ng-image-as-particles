@@ -73,7 +73,7 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
       case 'center':
         this.justifyContent = 'center';
         break;
-      case 'center':
+      case 'end':
         this.justifyContent = 'flex-end';
         break;
       default:
