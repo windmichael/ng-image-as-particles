@@ -4,7 +4,8 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
+    "build-library": "ng build",
+    "build-showcase-prod": "ng build ng-showcase --prod",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e"

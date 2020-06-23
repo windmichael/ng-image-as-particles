@@ -1,6 +1,6 @@
 <div class="main-container">
     <div class="flex-column">
-        <h3>Image as interactive partilces demo</h3>
+        <h3>Demo: Images as interactive partilces</h3>
         <div class="flex-row">
             <div *ngFor="let imageUrl of imageUrls" class="image-selecton-container">
                 <img [src]="imageUrl" (click)="selectImage(imageUrl)">

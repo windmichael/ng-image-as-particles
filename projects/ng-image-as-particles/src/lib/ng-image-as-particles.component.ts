@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, AfterViewInit, Input, OnInit, OnDestroy } from '@angular/core';
+import { Component, ViewChild, ElementRef, AfterViewInit, Input, OnInit, OnDestroy, HostListener } from '@angular/core';
 import * as THREE from 'three';
 import { RawShaderMaterial } from 'three';
 import { TouchTexture } from './scripts/touch-texture';
@@ -27,6 +27,7 @@ import { Shaders } from './scripts/shaders';
 })
 export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDestroy {
 
+  // Declare variables
   private renderer: THREE.WebGLRenderer;
   private scene: THREE.Scene;
   private camera: THREE.PerspectiveCamera;
@@ -47,6 +48,7 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
   justifyContent: string;
   alignItems: string;
 
+  // Angular Inputs
   @Input()
   set imageUrl(imageUrl: string) {
     // Check if hinding process is already going on
@@ -117,9 +119,6 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
     this.canvasRef.nativeElement.appendChild(this.renderer.domElement);
     this.canvasRef.nativeElement.children[0].addEventListener('mousemove', ev => { this.onMouseMove(ev); }, false);
     this.canvasRef.nativeElement.children[0].addEventListener('touchmove', ev => { this.onTouchMove(ev); }, false);
-    window.addEventListener('resize', ev => { this.resize(); }, false);
-    window.addEventListener('scroll', ev => { this.onScroll(ev); }, true);
-    // this.canvasRef.nativeElement.addEventListener('click', ev => { this.onClick(ev); }, false);
 
     this.animate();
   }
@@ -128,8 +127,6 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
     // remove event listeners
     this.canvasRef.nativeElement.removeEventListener('mousemove', ev => { this.onMouseMove(ev); }, false);
     this.canvasRef.nativeElement.removeEventListener('touchmove', ev => { this.onTouchMove(ev); }, false);
-    window.removeEventListener('resize', ev => { this.resize(); }, false);
-    window.removeEventListener('scroll', ev => { this.onScroll(ev); }, true);
   }
 
   initScene(): void {
@@ -409,14 +406,6 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
     }
   }
 
-  onScroll(event) {
-    if (window.pageYOffset / window.innerHeight > 0.9) {
-      this.stopAnimation = true;
-    } else {
-      this.stopAnimation = false;
-    }
-  }
-
   onMouseMove(event: MouseEvent): void {
     const offsetLeft = this.canvasRef.nativeElement.offsetLeft + this.canvasRef.nativeElement.children[0].offsetLeft;
     const offsetTop = this.canvasRef.nativeElement.offsetTop + this.canvasRef.nativeElement.children[0].offsetTop;
@@ -433,15 +422,6 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
     }
   }
 
-  /*
-  onClick( event: MouseEvent ): void {
-    console.info('raw: x= ' + event.clientX + ' , y= ' + event.clientY);
-    let x = ( event.clientX - this.canvasRef.nativeElement.offsetLeft) / this.canvasRef.nativeElement.clientWidth * 2 - 1;
-    let y = - ( event.clientY - this.canvasRef.nativeElement.offsetTop) / this.canvasRef.nativeElement.clientHeight * 2 + 1;
-    console.info('normalized: x= ' + x + ' , y= ' + y);
-  }
-  */
-
   onTouchMove(event: TouchEvent): void {
     const offsetLeft = this.canvasRef.nativeElement.offsetLeft + this.canvasRef.nativeElement.children[0].offsetLeft;
     const offsetTop = this.canvasRef.nativeElement.offsetTop + this.canvasRef.nativeElement.children[0].offsetTop;
@@ -455,9 +435,9 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
     }
   }
 
-  private resize(): void {
+  @HostListener('window:resize') resize(): void {
     if (this.height !== undefined) {
-      this.camera.aspect = this.canvasRef.nativeElement.children[0].clientWidth / this.canvasRef.nativeElement.children[0].clientHeight;
+      this.camera.aspect = this.canvasRef.nativeElement.clientWidth / this.canvasRef.nativeElement.clientHeight;
       this.camera.updateProjectionMatrix();
       const fovHeight = 2 * Math.tan(this.camera.fov * Math.PI / 180 / 2) * this.camera.position.z;
       const scale = fovHeight / this.height;
@@ -470,6 +450,15 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
             this.distanceAsNumber(this.imageHeight, this.canvasRef.nativeElement.clientHeight);
         this.renderer.setSize(width, height);
       }
+    }
+  }
+
+  @HostListener('window:scroll') onScroll(): void {
+    if ((window.pageYOffset + window.innerHeight) < this.canvasRef.nativeElement.offsetTop ||
+          window.pageYOffset > (this.canvasRef.nativeElement.clientHeight + this.canvasRef.nativeElement.offsetTop) ) {
+      this.stopAnimation = true;
+    } else {
+      this.stopAnimation = false;
     }
   }
 

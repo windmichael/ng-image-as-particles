@@ -1,13 +1,13 @@
 {
   "name": "ng-image-as-particles",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Angular library to show images as particles with using three.js",
   "author": "Michael Wind",
   "repository": {
     "type": "git",
     "url": "https://github.com/windmichael/ng-image-as-particles.git"
   },
-  "bugs":{
+  "bugs": {
     "url": "https://github.com/windmichael/ng-image-as-particles/issues"
   },
   "homepage": "https://github.com/windmichael/ng-image-as-particles",
