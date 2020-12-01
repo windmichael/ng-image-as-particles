@@ -24,6 +24,6 @@
   "peerDependencies": {
     "@angular/common": "^8.2.14",
     "@angular/core": "^8.2.14",
-    "three": "^0.108.0"
+    "three": "^0.123.0"
   }
 }
