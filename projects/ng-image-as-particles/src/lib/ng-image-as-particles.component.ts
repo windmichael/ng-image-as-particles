@@ -103,7 +103,7 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
   }
   get verticalAlignment(): string { return this.alignItems; }
 
-  @ViewChild('container', { static: false }) canvasRef: ElementRef;
+  @ViewChild('container') canvasRef: ElementRef;
 
   constructor() {
   }
