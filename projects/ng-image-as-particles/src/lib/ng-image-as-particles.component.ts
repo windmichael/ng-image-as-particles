@@ -222,7 +222,7 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
     positions.setXYZ(1, 0.5, 0.5, 0.0);
     positions.setXYZ(2, -0.5, -0.5, 0.0);
     positions.setXYZ(3, 0.5, -0.5, 0.0);
-    geometry.addAttribute('position', positions);
+    geometry.setAttribute('position', positions);
 
     // uvs
     const uvs = new THREE.BufferAttribute(new Float32Array(4 * 2), 2);
@@ -230,7 +230,7 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
     uvs.setXY(1, 1.0, 0.0);
     uvs.setXY(2, 0.0, 1.0);
     uvs.setXY(3, 1.0, 1.0);
-    geometry.addAttribute('uv', uvs);
+    geometry.setAttribute('uv', uvs);
 
     // index
     geometry.setIndex(new THREE.BufferAttribute(new Uint16Array([0, 2, 1, 2, 3, 1]), 1));
@@ -252,9 +252,9 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
       j++;
     }
 
-    geometry.addAttribute('pindex', new THREE.InstancedBufferAttribute(indices, 1, false));
-    geometry.addAttribute('offset', new THREE.InstancedBufferAttribute(offsets, 3, false));
-    geometry.addAttribute('angle', new THREE.InstancedBufferAttribute(angles, 1, false));
+    geometry.setAttribute('pindex', new THREE.InstancedBufferAttribute(indices, 1, false));
+    geometry.setAttribute('offset', new THREE.InstancedBufferAttribute(offsets, 3, false));
+    geometry.setAttribute('angle', new THREE.InstancedBufferAttribute(angles, 1, false));
 
     this.object3D = new THREE.Mesh(geometry, material);
     this.container = new THREE.Object3D();
