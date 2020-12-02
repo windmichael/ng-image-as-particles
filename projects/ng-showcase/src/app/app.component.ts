@@ -6,7 +6,7 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
-  title = 'ng-image-as-particles-showcase';
+  title = 'Image As Particles - Showcase';
   imageUrls: string[] = ['assets/dog.png', 'assets/pexels-photo.png', 'assets/tiger.png'];
   selectedUrl: string;
 

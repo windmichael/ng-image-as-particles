@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { RawShaderMaterial } from 'three';
 import { TouchTexture } from './scripts/touch-texture';
 import { Shaders } from './scripts/shaders';
+import { RxjsTween } from './tween/rxjs-tween';
 
 @Component({
   selector: 'lib-image-as-particles',
@@ -51,14 +52,11 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
   // Angular Inputs
   @Input()
   set imageUrl(imageUrl: string) {
-    // Check if hinding process is already going on
-    if (this._imageChanging === true) { return; }
     this._imageUrl = imageUrl;
+    if(this._imageChanging == true) return;
     if (this.object3D != null) {
       this._imageChanging = true;
-      this.hide().then((value) => {
-        this.initParticles(this._imageUrl);
-      });
+      this.triggerImageChange();
     }
   }
   get imageUrl(): string { return this._imageUrl; }
@@ -283,100 +281,30 @@ export class NgImageAsParticlesComponent implements OnInit, AfterViewInit, OnDes
     (this.object3D.material as RawShaderMaterial).uniforms.uTime.value += delta;
   }
 
-  show(time = 1.0) {
-    const interval = 50; // ms
-    const initValue1 = 0.5;
-    const endValue1 = 1.5;
-    let cnt1 = 0;
-    let value1 = 0.0;
-
-    const interval1 = window.setInterval(() => {
-      cnt1 = cnt1 + 1;
-      value1 = initValue1 + cnt1 * (endValue1 - initValue1) / (time * 1000 / interval);
-      (this.object3D.material as RawShaderMaterial).uniforms.uSize.value = value1;
-      if (value1 >= endValue1) {
-        window.clearInterval(interval1);
-        this._imageChanging = false;
-      }
-    }, interval);
-
-    const initValue2 = 0.0;
-    const endValue2 = 2.0;
-    let cnt2 = 0;
-    let value2 = 0.0;
-
-    const interval2 = window.setInterval(() => {
-      cnt2 = cnt2 + 1;
-      value2 = initValue2 + cnt2 * (endValue2 - initValue2) / (time * 1000 / interval);
-      (this.object3D.material as RawShaderMaterial).uniforms.uRandom.value = value2;
-      if (value2 >= endValue2) {
-        window.clearInterval(interval2);
-      }
-    }, interval);
-
-    const initValue3 = 40.0;
-    const endValue3 = 4.0;
-    let cnt3 = 0;
-    let value3 = 0.0;
-
-    const intervalHandler3 = window.setInterval(() => {
-      cnt3 = cnt3 + 1;
-      value3 = initValue3 - cnt3 * (initValue3 - endValue3) / (time * 1000 / interval);
-      (this.object3D.material as RawShaderMaterial).uniforms.uDepth.value = value3;
-      if (value3 <= endValue3) {
-        window.clearInterval(intervalHandler3);
-      }
-    }, interval);
-
+  show(time: number = 1000): void {
+    // Tween in
+    RxjsTween.createTween(RxjsTween.easeInOutQuad, [0.5, 0.0, 70.0], [1.5, 2.0, 4.0], time).subscribe(val => {
+      (this.object3D.material as RawShaderMaterial).uniforms.uSize.value = val[0];
+      (this.object3D.material as RawShaderMaterial).uniforms.uRandom.value = val[1];
+      (this.object3D.material as RawShaderMaterial).uniforms.uDepth.value = val[2];
+    }, () => {}, () => {
+      this._imageChanging = false;
+    });
   }
 
-  hide(time: number = 0.8) {
-    const interval = 50; // ms
-
-    const initValue3 = 1.5;
-    const endValue3 = 0.0;
-    let cnt3 = 0;
-    let value3 = 0.0;
-
-    const intervalHandler3 = window.setInterval(() => {
-      cnt3 = cnt3 + 1;
-      value3 = initValue3 - cnt3 * (initValue3 - endValue3) / (time * 1000 / interval);
-      (this.object3D.material as RawShaderMaterial).uniforms.uSize.value = value3;
-      if (value3 <= endValue3) {
-        window.clearInterval(intervalHandler3);
-      }
-    }, interval);
-
-    const initValue2 = 3.0;
-    const endValue2 = -20.0;
-    let cnt2 = 0;
-    let value2 = 0.0;
-
-    const interval2 = window.setInterval(() => {
-      cnt2 = cnt2 + 1;
-      value2 = initValue2 - cnt2 * (initValue2 - endValue2) / (time * 1000 / interval);
-      (this.object3D.material as RawShaderMaterial).uniforms.uDepth.value = value2;
-      if (value2 <= endValue2) {
-        window.clearInterval(interval2);
-      }
-    }, interval);
-
-    const initValue1 = 0.0;
-    const endValue1 = 5.0;
-    let cnt1 = 0;
-    let value1 = 0.0;
-
-    return new Promise((resolve, reject) => {
-      const interval1 = window.setInterval(() => {
-        cnt1 = cnt1 + 1;
-        value1 = initValue1 + cnt1 * (endValue1 - initValue1) / (time * 1000 / interval);
-        (this.object3D.material as RawShaderMaterial).uniforms.uRandom.value = value1;
-        if (value1 >= endValue1) {
-          window.clearInterval(interval1);
-          this.destroy();
-          resolve();
-        }
-      }, interval);
+  triggerImageChange(time: number = 1000): void {
+    const uSizeStart = (this.object3D.material as RawShaderMaterial).uniforms.uSize.value;
+    const uRandomStart = (this.object3D.material as RawShaderMaterial).uniforms.uRandom.value;
+    const uDepth = (this.object3D.material as RawShaderMaterial).uniforms.uDepth.value;
+    // Tween out
+    RxjsTween.createTween(RxjsTween.easeInOutQuad, [uSizeStart, uRandomStart, uDepth], [0.0, 5.0, -20.0], time).subscribe(val => {
+      (this.object3D.material as RawShaderMaterial).uniforms.uSize.value = val[0];
+      (this.object3D.material as RawShaderMaterial).uniforms.uRandom.value = val[1];
+      (this.object3D.material as RawShaderMaterial).uniforms.uDepth.value = val[2];
+    }, () => {}, () => {
+      this.destroy();
+      this.initParticles(this._imageUrl);
+      this._imageChanging = false;
     });
   }
 
