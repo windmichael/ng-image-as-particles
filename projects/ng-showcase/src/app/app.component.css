@@ -18,20 +18,22 @@
     height: 180px;
 }
 
-.image-selecton-container{
-    width: auto;
+.image-selection{
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
     cursor: pointer;
-    user-select: none;
-    margin: 5px;
+    margin: 2px;
+    border-radius: 3px;
+    box-shadow: 0 0px 5px 3px rgba(0, 0, 0, 0.3);
 }
 
-.image-selecton-container:hover{
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+.image-selection:hover{
+    box-shadow: 0 0px 10px 5px rgba(0, 0, 0, 0.8);
 }
 
-.image-selecton-container img{
-    width: auto;
-    height: 100%;
+.image-active{
+    box-shadow: 0 0px 10px 5px rgba(0, 0, 0, 0.8);
 }
 
 lib-image-as-particles{

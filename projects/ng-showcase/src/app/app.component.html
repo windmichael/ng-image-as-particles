@@ -2,12 +2,12 @@
     <div class="flex-column">
         <h3>Demo: Images as interactive partilces</h3>
         <div class="flex-row">
-            <div *ngFor="let imageUrl of imageUrls" class="image-selecton-container">
-                <img [src]="imageUrl" (click)="selectImage(imageUrl)">
-            </div>
+            <img class="image-selection" [ngClass]="{'image-active' : imageUrl === selectedUrl}" 
+            *ngFor="let imageUrl of imageUrls" 
+            [src]="imageUrl" (click)="selectImage(imageUrl)">
         </div>
         <lib-image-as-particles [imageUrl]="selectedUrl" touchAction="none"
-            imageWidth="90%" imageHeight="90%"
+            imageWidth="100%" imageHeight="100%" backgroundColor="#000000"
             horizontalAlignment="center" verticalAlignment="center">
         </lib-image-as-particles>
     </div>
