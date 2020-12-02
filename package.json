@@ -6,6 +6,7 @@
     "start": "ng serve",
     "build-library": "ng build",
     "build-showcase-prod": "ng build ng-showcase --prod",
+    "http-server": "http-server -p 8080 -c-1 docs",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e"
