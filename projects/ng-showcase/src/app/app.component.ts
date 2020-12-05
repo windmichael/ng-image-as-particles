@@ -7,8 +7,13 @@ import { Component, OnInit } from '@angular/core';
 })
 export class AppComponent implements OnInit {
   title = 'Image As Particles - Showcase';
-  imageUrls: string[] = ['assets/dog.png', 'assets/pexels-photo.png', 'assets/tiger.png'];
+  imageUrls: string[] = [
+    'assets/dog.png', 
+    'assets/pexels-photo.png', 
+    'assets/tiger.png', 
+    'assets/blue-parakeet-sits-on-eggs.png'];
   selectedUrl: string;
+  backgroundColor: string;
 
   ngOnInit() {
     this.selectedUrl = this.imageUrls[0];

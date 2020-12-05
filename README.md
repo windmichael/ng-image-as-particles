@@ -17,13 +17,13 @@ A description and a tutorial how the project was created can be found on https:/
 
 
 ## Dependencies
-* [Angular](https://angular.io) (*requires* Angular 8+ )
-* [three.js](https://threejs.org) (*requires* threejs 0.108.0 )
+* [Angular](https://angular.io) (*requires* Angular 10+ )
+* [three.js](https://threejs.org) (*requires* threejs 0.123.0 )
 
 ## Installation
-#### 1. Install version 0.108.0 of `three.js` via npm:
+#### 1. Install version 0.123.0 of `three.js` via npm:
 ```
-npm install three@0.108.0
+npm install three@0.123.0
 ```
 
 #### 2. Install `ng-image-as-particles` via npm:
@@ -47,7 +47,7 @@ export class AppModule {
 ## Usage
 ```html
 <lib-image-as-particles [imageUrl]="selectedUrl" touchAction="none"
-            imageWidth="90%" imageHeight="90%"
+            imageWidth="90%" imageHeight="90%" backgroundColor="#222222"
             horizontalAlignment="center" verticalAlignment="center">
 </lib-image-as-particles>
 ```
@@ -56,7 +56,7 @@ export class AppModule {
 | Name  | Default | Description |
 | ----- | ------- | ----------- |
 | imageUrl | null | URL to the image |
-| backgroundColor | "#222" | The background-color CSS property sets the background color of an element. ([background-color](https://developer.mozilla.org/en-US/docs/Web/CSS/background-color)) |
+| backgroundColor | "##222222" | The background-color CSS property sets the background color of an element. ([background-color](https://developer.mozilla.org/en-US/docs/Web/CSS/background-color)) |
 | touchAction | "none" | The touch-action CSS property sets how an element's region can be manipulated by a touchscreen user. ([touchAction](https://developer.mozilla.org/en-US/docs/Web/CSS/touch-action)) |
 | imageWidth | "100%" | Width of the generated image in "px" or "%" |
 | imageHeight | "100%" | Height of the generated image in "px" or "%" |

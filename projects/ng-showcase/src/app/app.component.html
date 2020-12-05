@@ -1,13 +1,20 @@
 <div class="main-container">
     <div class="flex-column">
-        <h3>Demo: Images as interactive partilces</h3>
-        <div class="flex-row">
+        <h2>Demo: Images as interactive partilces</h2>
+        <h3>Select Image:</h3>
+        <div class="image-selection-container">
             <img class="image-selection" [ngClass]="{'image-active' : imageUrl === selectedUrl}" 
             *ngFor="let imageUrl of imageUrls" 
             [src]="imageUrl" (click)="selectImage(imageUrl)">
         </div>
+        <div class="settings-container">
+            <div>
+                <span>Background Color:</span>
+                <input type="color" ngModel #bkgCol="ngModel">
+            </div>
+        </div>
         <lib-image-as-particles [imageUrl]="selectedUrl" touchAction="none"
-            imageWidth="100%" imageHeight="100%" backgroundColor="#000000"
+            imageWidth="100%" imageHeight="100%" [backgroundColor]="bkgCol.value"
             horizontalAlignment="center" verticalAlignment="center">
         </lib-image-as-particles>
     </div>
