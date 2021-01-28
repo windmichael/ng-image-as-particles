@@ -1,4 +1,8 @@
 # Image As Particles
+
+<h3>This library been moved to 
+  <a href="https://github.com/windmichael/ngx-acuw">ngx-acuw</a>!!!</h3>
+
 Angular library to show images as particles with using three.js
 
 This library is based on the great work and code of [Bruno Imbrizi](https://github.com/brunoimbrizi/) and brought to Angular.
